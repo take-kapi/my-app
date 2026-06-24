@@ -5,9 +5,7 @@
   "scripts": {
     "start": "tsx index.js",
     "db:dev": "NODE_OPTIONS='--experimental-sqlite' prisma dev"
-
   },
-
   "devDependencies": {
     "@types/node": "^26.0.0",
     "prisma": "^7.8.0",
@@ -17,6 +15,8 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
     "pg": "^8.22.0"
   }
 }
