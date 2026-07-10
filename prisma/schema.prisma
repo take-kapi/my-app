@@ -3,15 +3,76 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
-generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-}
-
 datasource db {
   provider = "postgresql"
 }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id   Int    @id @default(autoincrement())
-  name String
+  id               Int            @id @default(autoincrement())
+  email            String         @unique
+  passwordHash     String
+  name             String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  items            Item[]         // ユーザーが出品した教科書
+  sentRequests     TradeRequest[] @relation("SentRequests") // 送信した交換リクエスト
+  receivedRequests TradeRequest[] @relation("ReceivedRequests") // 受信した交換リクエスト
+  comments         Comment[]      // 投稿したコメント
+  favorites        Favorite[]     // お気に入り登録した教科書
+}
+
+model Item {
+  id            Int            @id @default(autoincrement())
+  title         String
+  author        String
+  courseName    String         // 授業名
+  condition     String         // 状態 ("新品同様", "目立った傷なし", "書き込みあり"など)
+  image         String         // 写真（画像URL、またはBase64、またはダミー画像パス）
+  comment       String?        // コメント
+  isAvailable   Boolean        @default(true) // 交換可能フラグ
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tradeRequests TradeRequest[] // この教科書に対する交換リクエスト
+  comments      Comment[]      // この教科書に対するコメント
+  favorites     Favorite[]     // お気に入りのリレーション
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TradeRequest {
+  id         Int      @id @default(autoincrement())
+  senderId   Int      // 交換を申し込んだユーザー
+  sender     User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId Int      // 教科書の出品者
+  receiver   User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  itemId     Int      // 対象の教科書
+  item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  status     String   @default("PENDING") // ステータス: "PENDING", "APPROVED", "REJECTED"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  itemId    Int
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId    Int
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, itemId])
 }

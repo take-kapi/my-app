@@ -1,0 +1,6 @@
+{
+  "name": "Textbook Exchange",
+  "description": "大学生のための教科書交換プラットフォーム",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
